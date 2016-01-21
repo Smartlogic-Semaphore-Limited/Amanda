@@ -1638,7 +1638,21 @@ Validation.prototype.validateItems = function(instance, schema, path, callback) 
         );
       }, callback);
     }
-
+    
+    /*
+     * There is a bug in amanda 0.5.1 here: if the number of schema items
+     * is greater than the number of instance items, and "additionalItems"
+     * flag is set to false, extra instance items are ignored instead of
+     * returning a validation error.
+     *
+     * We just fill the remaining items with undefineds to avoid this.
+     */
+    if (instance.length < schema.items.length) {
+      instance = instance.slice();
+      while (instance.length < schema.items.length) {
+        instance.push(undefined);
+      }
+    }
     return each(instance, function(itemIndex, itemValue, callback) {
 
       // The ‘additionalItems’ attribute is a schema that defines
